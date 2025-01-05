@@ -17,14 +17,8 @@ FTP_USER = os.getenv('FTP_USER', '')
 FTP_PASS = os.getenv('FTP_PASS', '')
 FTP_PATH = '/public_html/Felisarium'
 
-@app.route('/upload', methods=['POST'])
-def upload_file():
+def upload_file_to_ftp(filename, content):
     try:
-        # Get content from request
-        content = request.json.get('content')
-        if not content:
-            return jsonify({'error': 'No content provided'}), 400
-
         # Convert content to bytes
         content_bytes = content.encode('utf-8')
         
@@ -36,16 +30,30 @@ def upload_file():
         ftp.cwd(FTP_PATH)
         
         # Upload the file
-        ftp.storbinary('STOR input.txt', io.BytesIO(content_bytes))
+        ftp.storbinary(f'STOR {filename}', io.BytesIO(content_bytes))
         
         # Close FTP connection
         ftp.quit()
         
-        return jsonify({'message': 'File uploaded successfully'}), 200
+        return {'message': 'File uploaded successfully'}, 200
         
     except Exception as e:
         print(f"Error: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        return {'error': str(e)}, 500
+
+@app.route('/upload-felisadas', methods=['POST'])
+def upload_felisadas():
+    content = request.json.get('content')
+    if not content:
+        return jsonify({'error': 'No content provided'}), 400
+    return jsonify(*upload_file_to_ftp('felisadas.txt', content))
+
+@app.route('/upload-otros', methods=['POST'])
+def upload_otros():
+    content = request.json.get('content')
+    if not content:
+        return jsonify({'error': 'No content provided'}), 400
+    return jsonify(*upload_file_to_ftp('otros.txt', content))
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
