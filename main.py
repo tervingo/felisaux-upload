@@ -55,5 +55,12 @@ def upload_otros():
         return jsonify({'error': 'No content provided'}), 400
     return jsonify(*upload_file_to_ftp('otros.txt', content))
 
+@app.route('/upload-serranadas', methods=['POST'])
+def upload_serranadas():
+    content = request.json.get('content')
+    if not content:
+        return jsonify({'error': 'No content provided'}), 400
+    return jsonify(*upload_file_to_ftp('serranadas.txt', content))
+
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
